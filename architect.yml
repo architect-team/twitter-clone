@@ -1,0 +1,59 @@
+version: v2
+
+databases:
+  main:
+    type: postgres:15
+
+dependencies:
+  users:
+    component: architect/users
+    variables:
+      allowed_return_urls:
+        - ${{ ingresses.app.url }}
+
+builds:
+  frontend:
+    context: ./
+    debug:
+      dockerfile: Dockerfile.dev
+
+deployments:
+  frontend:
+    image: ${{ builds.frontend.id }}
+    environment:
+      DB_URL: ${{ databases.main.url }}
+      NEXT_PUBLIC_SELF_ADDR: ${{ ingresses.app.url }}
+      NEXT_PUBLIC_KRATOS_ADDR: ${{ dependencies.users.ingresses.kratos-public.url }}
+      NEXT_PUBLIC_USER_SERVICE_ADDR: ${{ dependencies.users.ingresses.auth.url }}
+    command:
+      - sh
+      - -c
+      - |
+        npx prisma migrate deploy
+        node server.js
+    debug:
+      command:
+        - sh
+        - -c
+        - |
+          npx prisma db push
+          npm run dev
+      volumes:
+        app:
+          host_path: ./app
+          mount_path: /app/app
+        public:
+          host_path: ./public
+          mount_path: /app/public
+        prisma:
+          host_path: ./prisma
+          mount_path: /app/prisma
+
+services:
+  frontend:
+    deployment: frontend
+    port: 3000
+
+ingresses:
+  app:
+    service: frontend
