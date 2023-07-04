@@ -1,4 +1,6 @@
-import NavbarComponent from './(layout)/navbar';
+import NavbarLoginLogoutBtn from './(layout)/(navbar)/login-logout-btn';
+import NavbarComponent from './(layout)/(navbar)/navbar';
+import NavbarSignupBtn from './(layout)/(navbar)/signup-btn';
 import './globals.css';
 import { Inter } from 'next/font/google';
 
@@ -12,7 +14,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <NavbarComponent />
+        <NavbarComponent
+          loginLogoutBtn={<NavbarLoginLogoutBtn />}
+          signupBtn={<NavbarSignupBtn />}
+        />
 
         {children}
       </body>
