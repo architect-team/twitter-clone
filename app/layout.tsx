@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import NavbarLoginLogoutBtn from './(layout)/(navbar)/login-logout-btn';
 import NavbarComponent from './(layout)/(navbar)/navbar';
 import NavbarSignupBtn from './(layout)/(navbar)/signup-btn';

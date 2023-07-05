@@ -1,71 +1,31 @@
-'use client';
+import { Metadata } from 'next';
+import AddMovieForm from './add-movie-form';
+import { cookies } from 'next/headers';
+import { Session } from '@ory/client';
+import { oryServer } from '@/app/ory';
+import { redirect } from 'next/navigation';
 
-import { Label, TextInput, Textarea } from 'flowbite-react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Button from '@/app/(layout)/button';
+export const metadata: Metadata = {
+  title: 'Register new movie',
+};
 
-export default function AddMoviePage() {
-  const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-
-  const onSubmit = async (event: any) => {
-    event.preventDefault();
-    await fetch('/api/movies', {
-      method: 'POST',
-      body: JSON.stringify({ title, description }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+export default async function AddMoviePage() {
+  let session: Session | undefined;
+  try {
+    const cookieStore = cookies();
+    const { data } = await oryServer.toSession({
+      cookie: cookieStore.toString(),
     });
-
-    router.push('/movies');
-  };
-
-  const onTitleChange = (event: any) => {
-    event.preventDefault();
-    setTitle(event.target.value);
-  };
-
-  const onDescriptionChange = (event: any) => {
-    event.preventDefault();
-    setDescription(event.target.value);
-  };
+    session = data;
+  } catch {
+    redirect('/movies');
+  }
 
   return (
     <main className="container mx-auto h-full p-12 max-w-2xl">
       <h1 className="text-4xl font-bold text-center">Add movie</h1>
 
-      <form
-        className="bg-white rounded-lg shadow-md p-6 my-6"
-        onSubmit={onSubmit}
-      >
-        <div className="mb-2 block">
-          <Label htmlFor="title" value="Movie title" />
-        </div>
-        <TextInput
-          id="title"
-          required
-          type="text"
-          onChange={onTitleChange}
-          value={title}
-        />
-
-        <div className="mb-2 mt-6 block">
-          <Label htmlFor="description" value="Movie description" />
-        </div>
-        <Textarea
-          id="description"
-          required
-          onChange={onDescriptionChange}
-          value={description}
-        />
-
-        <Button type="submit" className="mt-6">
-          Add
-        </Button>
-      </form>
+      <AddMovieForm />
     </main>
   );
 }

@@ -15,9 +15,20 @@ export default async function NavbarSignupBtn() {
     let registrationUrl =
       process.env.NEXT_PUBLIC_USER_SERVICE_ADDR?.replace(/\/$/, '') +
       '/registration';
-    const returnTo = headerStore.get('Referer');
+    const returnTo = process.env.NEXT_PUBLIC_SELF_ADDR;
     if (returnTo) {
-      registrationUrl += '?return_to=' + encodeURIComponent(returnTo);
+      const query = {
+        return_to: returnTo,
+        after_verification_return_to: returnTo,
+      };
+      registrationUrl +=
+        '?' +
+        Object.entries(query)
+          .reduce((acc, [key, val]) => {
+            acc.push(`${key}=${encodeURIComponent(val)}`);
+            return acc;
+          }, [] as string[])
+          .join('&');
     }
 
     return (

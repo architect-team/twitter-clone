@@ -15,8 +15,9 @@ model Movie {
   createdAt   DateTime  @default(now()) @db.Timestamp(6)
   updatedAt   DateTime  @default(now()) @db.Timestamp(6)
   deletedAt   DateTime? @db.Timestamp(6)
-  name        String
+  title       String
   description String
+  ownerId     String
   releaseDate DateTime
   Rating      Rating[]
 }
@@ -26,6 +27,7 @@ model Rating {
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @db.Timestamp(6)
   deletedAt DateTime? @db.Timestamp(6)
+  userId    String
   movie     Movie     @relation(fields: [movieId], references: [id])
   movieId   String
   rating    Int

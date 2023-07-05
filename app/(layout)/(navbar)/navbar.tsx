@@ -24,18 +24,9 @@ export type NavbarComponentProps = {
 export default function NavbarComponent(props: NavbarComponentProps) {
   return (
     <Flowbite theme={{ theme: navbarTheme }}>
-      <Navbar>
-        <Navbar.Brand href="/">
-          <Image
-            alt="Logo"
-            className="mr-3 h-6 sm:h-9"
-            src="/favicon.ico"
-            width={35}
-            height={40}
-          />
-          <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-            Architect Movie DB
-          </span>
+      <Navbar className="border-b-2">
+        <Navbar.Brand href="/" className="py-2">
+          <img alt="Logo" className="mr-3 h-6" src="/architect-logo.svg" />
         </Navbar.Brand>
 
         <Navbar.Collapse>

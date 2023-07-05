@@ -6,12 +6,11 @@ export default async function NavbarLoginLogoutBtn() {
   const headerStore = headers();
 
   try {
-    console.log('Requesting logout url for', headerStore.get('Referer'));
-    const {
+    let {
       data: { logout_url },
     } = await oryServer.createBrowserLogoutFlow({
       cookie: cookieStore.toString(),
-      returnTo: headerStore.get('Referer') || undefined,
+      returnTo: process.env.NEXT_PUBLIC_SELF_ADDR,
     });
 
     return (
@@ -31,6 +30,9 @@ export default async function NavbarLoginLogoutBtn() {
     const returnTo = headerStore.get('Referer');
     if (returnTo) {
       loginUrl += '?return_to=' + encodeURIComponent(returnTo);
+    } else if (process.env.NEXT_PUBLIC_SELF_ADDR) {
+      loginUrl +=
+        '?return_to=' + encodeURIComponent(process.env.NEXT_PUBLIC_SELF_ADDR);
     }
 
     return (
