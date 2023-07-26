@@ -2,7 +2,7 @@ import 'server-only';
 
 import { PrismaClient } from '@prisma/client';
 
-if (!global.prisma) {
-  global.prisma = new PrismaClient();
+if (!(global as any).prisma) {
+  (global as any).prisma = new PrismaClient();
 }
-export default global.prisma as PrismaClient;
+export default (global as any).prisma as PrismaClient;

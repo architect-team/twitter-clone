@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: 'Movie list',
 };
 
+// This is so that next build doesn't attempt to prerender the page.
+// This would trigger the prisma client during builds which would fail.
+export const dynamic = 'force-dynamic';
+
 export default async function MovieListPage() {
   let session: Session | undefined;
   try {
