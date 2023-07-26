@@ -8,15 +8,20 @@ module.exports = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      colors: {
+        primary: {
+          100: '#c6ecc9',
+          200: '#a1e0a6',
+          300: '#78d581',
+          400: '#55cb64',
+          500: '#2dc147',
+          600: '#21b13e',
+          700: '#0d9e31',
+          800: '#008d26',
+          900: '#006d12',
+        },
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('flowbite/plugin'),
-  ],
+  plugins: [require('@tailwindcss/forms'), require('flowbite/plugin')],
 };
