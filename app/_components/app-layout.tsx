@@ -1,6 +1,5 @@
 'use client';
 
-import crypto from 'crypto';
 import { Fragment, useEffect, useState } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import {
@@ -17,13 +16,17 @@ import {
 import { Button } from './button';
 import { oryClient } from '../ory';
 import { Session } from '@ory/client';
-
-const classNames = (...classes: string[]) => classes.filter(Boolean).join(' ');
+import { classNames, getGravatarImageUrl } from './utils';
 
 export const AppLayout = ({ children }: React.PropsWithChildren) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [session, setSessionData] = useState<Session | undefined>(undefined);
   const [logoutUrl, setLogoutUrl] = useState('');
+
+  const returnTo =
+    typeof window === 'object'
+      ? window.location.href
+      : process.env.NEXT_PUBLIC_SELF_ADDR;
 
   const navigation = [
     { name: 'Home', href: '#', icon: HomeIcon, current: true, inverted: false },
@@ -67,7 +70,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         href:
           process.env.NEXT_PUBLIC_USER_SERVICE_ADDR?.replace(/\/$/, '') +
           '/login?return_to=' +
-          window.location.href,
+          returnTo,
         icon: UserIcon,
         current: false,
         inverted: false,
@@ -77,7 +80,9 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         href:
           process.env.NEXT_PUBLIC_USER_SERVICE_ADDR?.replace(/\/$/, '') +
           '/registration?return_to=' +
-          window.location.href,
+          returnTo +
+          '&after_verification_return_to=' +
+          returnTo,
         icon: UserIcon,
         current: false,
         inverted: true,
@@ -87,20 +92,13 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
 
   const userNavigation = [{ name: 'Sign out', href: logoutUrl }];
 
-  const getGravatarImageUrl = (email: string) => {
-    const md5 = crypto.createHash('md5').update(email).digest('hex');
-    return `https://www.gravatar.com/avatar/${md5}?d=mp`;
-  };
-
   useEffect(() => {
     oryClient
       .toSession()
       .then(({ data }) => {
         setSessionData(data);
         oryClient
-          .createBrowserLogoutFlow({
-            returnTo: window.location.href,
-          })
+          .createBrowserLogoutFlow({ returnTo })
           .then(({ data: { logout_url } }) => {
             setLogoutUrl(logout_url);
           });
@@ -108,10 +106,10 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
       .catch(() => {
         // Intentionally left blank
       });
-  }, []);
+  }, [returnTo]);
 
   return (
-    <div>
+    <>
       <Transition.Root show={sidebarOpen} as={Fragment}>
         <Dialog
           as="div"
@@ -275,7 +273,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
 
                   {session && (
                     <li key="yeet" className="pt-4">
-                      <Button color="primary" className="w-full" variant="pill">
+                      <Button color="primary" className="w-full rounded-full">
                         Yeet
                       </Button>
                     </li>
@@ -366,6 +364,6 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
       </div>
 
       {children}
-    </div>
+    </>
   );
 };

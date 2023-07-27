@@ -10,26 +10,11 @@ datasource db {
   url      = env("DB_URL")
 }
 
-model Movie {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt   DateTime  @default(now()) @db.Timestamp(6)
-  deletedAt   DateTime? @db.Timestamp(6)
-  title       String
-  description String
-  ownerId     String
-  releaseDate DateTime
-  Rating      Rating[]
-}
-
-model Rating {
+model Yeet {
   id        String    @id @default(uuid())
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @db.Timestamp(6)
   deletedAt DateTime? @db.Timestamp(6)
-  userId    String
-  movie     Movie     @relation(fields: [movieId], references: [id])
-  movieId   String
-  rating    Int
-  comment   String?
+  ownerId   String
+  message   String    @db.VarChar(280)
 }

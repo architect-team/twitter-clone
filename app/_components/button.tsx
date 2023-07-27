@@ -28,9 +28,5 @@ export const Button = (props: ButtonProps) => {
     }
   }
 
-  if (props.variant === 'pill') {
-    classes.push('rounded-full');
-  }
-
   return <button {...props} className={classes.join(' ')} />;
 };
