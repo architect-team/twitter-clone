@@ -1,13 +1,8 @@
 import { Metadata } from 'next';
 import React from 'react';
 import { YeetFeed } from './yeet-feed';
-import { PageHeader } from '../../components/page-header';
+import { PageHeader } from '../_components/page-header';
 import { HomeYeetForm } from './home-yeet-form';
-import { Provider } from 'react-redux';
-import { store } from '@/store';
-import { cookies } from 'next/headers';
-import { oryServer } from '../../ory';
-import { setSessionData } from '@/store/authSlice';
 
 export const metadata: Metadata = {
   title: 'The Y Feed',

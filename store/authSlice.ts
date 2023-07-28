@@ -13,7 +13,7 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setSessionData(
+    setAuthData(
       state,
       action: PayloadAction<{ session: Session; logoutUrl: string }>
     ) {
@@ -23,5 +23,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setSessionData } = authSlice.actions;
+export const { setAuthData } = authSlice.actions;
 export default authSlice.reducer;

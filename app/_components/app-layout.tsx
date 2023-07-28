@@ -1,8 +1,8 @@
 'use client';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
-import { RootState, AppDispatch } from '@/store';
+import { RootState } from '@/store';
 import { Fragment, useState } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import {
@@ -18,7 +18,6 @@ import {
 import { Button } from './button';
 import { classNames, getGravatarImageUrl } from './utils';
 
-export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const AppLayout = ({ children }: React.PropsWithChildren) => {

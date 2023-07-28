@@ -1,4 +1,4 @@
-import { oryServer } from '@/ory';
+import { oryServer } from '../../ory';
 import prisma from '@/prisma';
 import { NextResponse } from 'next/server';
 
