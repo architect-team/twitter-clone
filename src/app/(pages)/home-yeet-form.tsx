@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button } from './_components/button';
+import { Button } from '../../components/button';
 
 export const HomeYeetForm = () => {
   const [message, setMessage] = React.useState('');

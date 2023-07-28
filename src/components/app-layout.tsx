@@ -1,11 +1,13 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
+import { RootState, AppDispatch } from '@/store';
+import { Fragment, useState } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import {
   Bars3Icon,
   BellIcon,
-  ChevronDownIcon,
   ChevronUpIcon,
   EnvelopeIcon,
   HomeIcon,
@@ -14,19 +16,15 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from './button';
-import { oryClient } from '../ory';
-import { Session } from '@ory/client';
 import { classNames, getGravatarImageUrl } from './utils';
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const AppLayout = ({ children }: React.PropsWithChildren) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [session, setSessionData] = useState<Session | undefined>(undefined);
-  const [logoutUrl, setLogoutUrl] = useState('');
 
-  const returnTo =
-    typeof window === 'object'
-      ? window.location.href
-      : process.env.NEXT_PUBLIC_SELF_ADDR;
+  const { session, logoutUrl } = useAppSelector((state) => state.auth);
 
   const navigation = [
     { name: 'Home', href: '#', icon: HomeIcon, current: true, inverted: false },
@@ -64,6 +62,11 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
       }
     );
   } else {
+    const returnTo =
+      typeof window === 'object'
+        ? window.location.href
+        : process.env.NEXT_PUBLIC_SELF_ADDR;
+
     navigation.push(
       {
         name: 'Sign in',
@@ -91,22 +94,6 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
   }
 
   const userNavigation = [{ name: 'Sign out', href: logoutUrl }];
-
-  useEffect(() => {
-    oryClient
-      .toSession()
-      .then(({ data }) => {
-        setSessionData(data);
-        oryClient
-          .createBrowserLogoutFlow({ returnTo })
-          .then(({ data: { logout_url } }) => {
-            setLogoutUrl(logout_url);
-          });
-      })
-      .catch(() => {
-        // Intentionally left blank
-      });
-  }, [returnTo]);
 
   return (
     <>

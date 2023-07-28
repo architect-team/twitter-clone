@@ -40,9 +40,9 @@ deployments:
           npx prisma db push
           npm run dev
       volumes:
-        app:
-          host_path: ./app
-          mount_path: /app/app
+        src:
+          host_path: ./src
+          mount_path: /app/src
         public:
           host_path: ./public
           mount_path: /app/public
