@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Button } from './_components/button';
+import { Button } from '../_components/button';
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline';
-import { getGravatarImageUrl } from './_components/utils';
+import { getGravatarImageUrl } from '../_components/utils';
 
 type Yeet = {
   id: string;

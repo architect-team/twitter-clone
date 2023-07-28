@@ -1,10 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Button } from './_components/button';
+import { Button } from '../_components/button';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import { getGravatarImageUrl } from '../_components/utils';
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const HomeYeetForm = () => {
   const [message, setMessage] = React.useState('');
+  const { session, logoutUrl } = useAppSelector((state) => state.auth);
 
   const submitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,12 +25,12 @@ export const HomeYeetForm = () => {
     location.reload();
   };
 
-  return (
+  return session ? (
     <div className="flex items-start space-x-4">
       <div className="flex-shrink-0">
         <img
           className="inline-block h-10 w-10 rounded-full"
-          src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+          src={getGravatarImageUrl(session.identity.traits.email)}
           alt=""
         />
       </div>
@@ -60,5 +66,5 @@ export const HomeYeetForm = () => {
         </form>
       </div>
     </div>
-  );
+  ) : null;
 };

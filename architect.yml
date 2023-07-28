@@ -43,6 +43,9 @@ deployments:
         app:
           host_path: ./app
           mount_path: /app/app
+        store:
+          host_path: ./store
+          mount_path: /app/store
         public:
           host_path: ./public
           mount_path: /app/public
