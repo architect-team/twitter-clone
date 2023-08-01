@@ -4,11 +4,14 @@ import React from 'react';
 import { Button } from '../_components/button';
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline';
 import { getGravatarImageUrl } from '../_components/utils';
+import { Identity } from '@ory/client';
 
 type Yeet = {
   id: string;
   message: string;
   createdAt: string;
+  ownerId: string;
+  user: Identity;
 };
 
 export const YeetFeed = () => {
@@ -27,6 +30,12 @@ export const YeetFeed = () => {
 
     const res = await fetch('/api/feed?' + searchParams.toString());
     const data = await res.json();
+    for (const index in data) {
+      const res = await fetch(`/api/profile/${data[index].ownerId}`);
+      const identity = await res.json();
+      data[index].user = identity;
+    }
+
     setRows([...rows, ...data]);
     setIsLoading(false);
   };
@@ -52,7 +61,7 @@ export const YeetFeed = () => {
                   <div className="relative">
                     <img
                       className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 ring-8 ring-white"
-                      src={getGravatarImageUrl('default')}
+                      src={getGravatarImageUrl(yeet.user.traits.email)}
                       alt=""
                     />
 
@@ -67,7 +76,8 @@ export const YeetFeed = () => {
                     <div>
                       <div className="text-sm">
                         <a href="#" className="font-medium text-gray-900">
-                          Unknown user
+                          {yeet.user.traits.name.first}{' '}
+                          {yeet.user.traits.name.last}
                         </a>
                       </div>
                       <p className="mt-0.5 text-sm text-gray-500">
