@@ -1,5 +1,5 @@
 import { oryServer } from '../../ory';
-import prisma from '@/prisma';
+import prisma from '@/app/prisma';
 import { NextResponse } from 'next/server';
 
 export const POST = async (request: Request) => {
