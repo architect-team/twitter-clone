@@ -1,8 +1,11 @@
 import { PropsWithChildren } from 'react';
 import { classNames } from './utils';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 export type PageHeaderProps = PropsWithChildren<{
   actions?: React.ReactNode;
+  back?: string;
   tabs?: [
     {
       name: string;
@@ -21,7 +24,15 @@ export const PageHeader = (props: PageHeaderProps) => {
       )}
     >
       <div className="md:flex md:items-center md:justify-between">
-        <h1 className="text-2xl font-semibold leading-6 text-gray-900">
+        {props.back && (
+          <Link
+            href={props.back}
+            className="shrink w-6 h-6 mr-6 pa-6 rounded-full hover:bg-gray-100"
+          >
+            <ArrowLeftIcon />
+          </Link>
+        )}
+        <h1 className="text-2xl font-semibold leading-6 text-gray-900 grow">
           {props.children}
         </h1>
         {props.actions && (

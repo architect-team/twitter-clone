@@ -1,16 +1,17 @@
 'use client';
 
 import React from 'react';
-import { Button } from '../_components/button';
+import { Button } from '@/app/_components/button';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { getGravatarImageUrl } from '../_components/utils';
+import { Avatar } from '@/app/_components/avatar';
 
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const HomeYeetForm = () => {
   const [message, setMessage] = React.useState('');
-  const { session, logoutUrl } = useAppSelector((state) => state.auth);
+  const { session } = useAppSelector((state) => state.auth);
 
   const submitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,10 +29,10 @@ export const HomeYeetForm = () => {
   return session ? (
     <div className="flex items-start space-x-4">
       <div className="flex-shrink-0">
-        <img
-          className="inline-block h-10 w-10 rounded-full"
+        <Avatar
+          type="image"
+          rounded="full"
           src={getGravatarImageUrl(session.identity.traits.email)}
-          alt=""
         />
       </div>
       <div className="min-w-0 flex-1">
@@ -45,7 +46,7 @@ export const HomeYeetForm = () => {
               maxLength={280}
               name="comment"
               id="comment"
-              className="block w-full resize-none border-0 border-b border-transparent p-0 pb-2 text-gray-900 placeholder:text-gray-400 focus:border-primary-400 focus:ring-0 sm:text-sm sm:leading-6"
+              className="block w-full resize-none border-0 border-b border-transparent p-0 pb-2 text-gray-900 placeholder:text-gray-400 focus:border-primary-400 focus:ring-0 sm:leading-6"
               placeholder="Add your comment..."
               defaultValue={''}
               onChange={(e) => setMessage(e.target.value)}

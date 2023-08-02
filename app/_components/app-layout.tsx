@@ -17,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from './button';
 import { classNames, getGravatarImageUrl } from './utils';
+import { Avatar } from './avatar';
 
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
@@ -26,13 +27,21 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
   const { session, logoutUrl } = useAppSelector((state) => state.auth);
 
   const navigation = [
-    { name: 'Home', href: '#', icon: HomeIcon, current: true, inverted: false },
+    {
+      name: 'Home',
+      href: '#',
+      icon: HomeIcon,
+      current: true,
+      inverted: false,
+      disabled: false,
+    },
     {
       name: 'Explore',
       href: '#',
       icon: MagnifyingGlassIcon,
       current: false,
       inverted: false,
+      disabled: false,
     },
   ];
 
@@ -44,6 +53,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         icon: BellIcon,
         current: false,
         inverted: false,
+        disabled: true,
       },
       {
         name: 'Messages',
@@ -51,6 +61,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         icon: EnvelopeIcon,
         current: false,
         inverted: false,
+        disabled: true,
       },
       {
         name: 'Profile',
@@ -58,6 +69,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         icon: UserIcon,
         current: false,
         inverted: false,
+        disabled: true,
       }
     );
   } else {
@@ -76,6 +88,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         icon: UserIcon,
         current: false,
         inverted: false,
+        disabled: false,
       },
       {
         name: 'Sign up',
@@ -88,6 +101,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         icon: UserIcon,
         current: false,
         inverted: true,
+        disabled: false,
       }
     );
   }
@@ -163,8 +177,9 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
                         <ul role="list" className="-mx-2 space-y-1">
                           {navigation.map((item) => (
                             <li key={item.name}>
-                              <a
+                              <Button
                                 href={item.href}
+                                disabled={item.disabled}
                                 className={classNames(
                                   item.current
                                     ? 'bg-gray-50 text-primary-400'
@@ -186,7 +201,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
                                   aria-hidden="true"
                                 />
                                 {item.name}
-                              </a>
+                              </Button>
                             </li>
                           ))}
                           {session && (
@@ -212,7 +227,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
       </Transition.Root>
 
       {/* Static sidebar for desktop */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+      <div className="hidden lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         {/* Sidebar component, swap this element with another sidebar if you like */}
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
           <div className="flex h-16 shrink-0 items-center">
@@ -228,9 +243,11 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
                 <ul role="list" className="-mx-2 space-y-1">
                   {navigation.map((item) => (
                     <li key={item.name}>
-                      <a
+                      <Button
                         href={item.href}
+                        disabled={item.disabled}
                         className={classNames(
+                          'w-full',
                           item.current
                             ? 'bg-gray-50 text-primary-400'
                             : 'text-gray-700 hover:text-primary-400 hover:bg-gray-50',
@@ -253,7 +270,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
                           aria-hidden="true"
                         />
                         {item.name}
-                      </a>
+                      </Button>
                     </li>
                   ))}
 
@@ -276,8 +293,9 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
                         className="flex justify-between items-center w-full gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50 rounded-full"
                       >
                         <div className="flex items-center gap-x-4">
-                          <img
-                            className="h-8 w-8 rounded-full bg-gray-50"
+                          <Avatar
+                            type="image"
+                            rounded="full"
                             src={getGravatarImageUrl(
                               session.identity.traits.email
                             )}
@@ -342,8 +360,9 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
         {session ? (
           <a href="#">
             <span className="sr-only">Your profile</span>
-            <img
-              className="h-8 w-8 rounded-full bg-gray-50"
+            <Avatar
+              type="image"
+              rounded="full"
               src={getGravatarImageUrl(session.identity.traits.email)}
               alt=""
             />

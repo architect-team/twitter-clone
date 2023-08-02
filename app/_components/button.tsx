@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export type ButtonProps = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
@@ -5,13 +7,24 @@ export type ButtonProps = React.DetailedHTMLProps<
   color?: 'primary';
   size?: 'sm' | 'md' | 'lg';
   variant?: 'pill';
+  href?: string;
 };
 
 export const Button = (props: ButtonProps) => {
   const classes = props.className ? props.className.split(' ') : [];
   classes.push('font-semibold');
+
   if (props.color === 'primary') {
     classes.push('bg-primary-400', 'text-white', 'hover:bg-primary-300');
+
+    if (props.disabled) {
+      classes.push(
+        'bg-primary-200',
+        'hover:bg-primary-200',
+        'text-white',
+        'cursor-not-allowed'
+      );
+    }
   }
 
   switch (props.size) {
@@ -28,5 +41,6 @@ export const Button = (props: ButtonProps) => {
     }
   }
 
-  return <button {...props} className={classes.join(' ')} />;
+  const btn = <button {...props} className={classes.join(' ')} />;
+  return props.href ? <Link href={props.href}>{btn}</Link> : btn;
 };
