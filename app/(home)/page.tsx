@@ -13,10 +13,10 @@ const HomePage = () => {
   return (
     <>
       <PageHeader>Home</PageHeader>
-      <div className="px-4 sm:px-6 lg:px-8 py-10 lg:py-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200">
         <HomeYeetForm />
       </div>
-      <div className="">
+      <div>
         <YeetFeed />
       </div>
     </>

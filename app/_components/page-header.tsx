@@ -27,9 +27,9 @@ export const PageHeader = (props: PageHeaderProps) => {
         {props.back && (
           <Link
             href={props.back}
-            className="shrink w-6 h-6 mr-6 pa-6 rounded-full hover:bg-gray-100"
+            className="shrink mr-6 p-2 rounded-full hover:bg-gray-100"
           >
-            <ArrowLeftIcon />
+            <ArrowLeftIcon className="w-6 h-6" />
           </Link>
         )}
         <h1 className="text-2xl font-semibold leading-6 text-gray-900 grow">

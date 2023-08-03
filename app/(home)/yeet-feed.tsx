@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Button } from '../_components/button';
-import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline';
 import { getGravatarImageUrl } from '../_components/utils';
 import { Identity } from '@ory/client';
 import { Avatar } from '../_components/avatar';
@@ -20,6 +19,7 @@ export const YeetFeed = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [rows, setRows] = React.useState<Yeet[]>([]);
+  const [moreYeetsAvailable, setMoreYeetsAvailable] = React.useState(false);
 
   const loadMoreRows = async () => {
     setIsLoading(true);
@@ -31,7 +31,7 @@ export const YeetFeed = () => {
     }
 
     const res = await fetch('/api/feed?' + searchParams.toString());
-    const data = await res.json();
+    const { total, rows: data } = await res.json();
     for (const index in data) {
       const res = await fetch(`/api/profile/${data[index].ownerId}`);
       const identity = await res.json();
@@ -40,6 +40,12 @@ export const YeetFeed = () => {
 
     setRows([...rows, ...data]);
     setIsLoading(false);
+
+    if (rows.length + data.length < total) {
+      setMoreYeetsAvailable(true);
+    } else {
+      setMoreYeetsAvailable(false);
+    }
   };
 
   React.useEffect(() => {
@@ -76,19 +82,23 @@ export const YeetFeed = () => {
         ))}
       </ul>
 
-      {isLoading ? (
-        <div>Loading</div>
-      ) : error ? (
-        <div>Error: {error.message}</div>
-      ) : (
-        <Button
-          color="primary"
-          className="rounded-full"
-          onClick={() => loadMoreRows()}
-        >
-          Load more
-        </Button>
-      )}
+      <div className="p-6 border-t border-gray-200">
+        {isLoading ? (
+          <div>Loading</div>
+        ) : error ? (
+          <div>Error: {error.message}</div>
+        ) : (
+          moreYeetsAvailable && (
+            <Button
+              color="primary"
+              className="rounded-full"
+              onClick={() => loadMoreRows()}
+            >
+              Load more
+            </Button>
+          )
+        )}
+      </div>
     </>
   );
 };
