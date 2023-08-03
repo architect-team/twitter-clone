@@ -2,10 +2,12 @@
 
 import React from 'react';
 import { Button } from '../_components/button';
-import { getGravatarImageUrl } from '../_components/utils';
+import { classNames, getGravatarImageUrl } from '../_components/utils';
 import { Identity } from '@ory/client';
 import { Avatar } from '../_components/avatar';
 import Link from 'next/link';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 type Yeet = {
   id: string;
@@ -15,11 +17,15 @@ type Yeet = {
   user: Identity;
 };
 
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
 export const YeetFeed = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [rows, setRows] = React.useState<Yeet[]>([]);
   const [moreYeetsAvailable, setMoreYeetsAvailable] = React.useState(false);
+
+  const { session } = useAppSelector((state) => state.auth);
 
   const loadMoreRows = async () => {
     setIsLoading(true);
@@ -54,7 +60,13 @@ export const YeetFeed = () => {
 
   return (
     <>
-      <ul role="list" className="divide-y divide-gray-100">
+      <ul
+        role="list"
+        className={classNames(
+          'divide-y divide-gray-100',
+          Boolean(session) ? 'border-t border-gray-200' : ''
+        )}
+      >
         {rows.map((yeet, yeetIndex) => (
           <li
             key={yeet.id}

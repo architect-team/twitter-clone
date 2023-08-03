@@ -27,7 +27,7 @@ export const HomeYeetForm = () => {
   };
 
   return session ? (
-    <div className="flex items-start space-x-4">
+    <div className="flex items-start space-x-4 p-6">
       <div className="flex-shrink-0">
         <Avatar
           type="image"
