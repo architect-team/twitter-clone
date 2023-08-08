@@ -22,8 +22,8 @@ deployments:
     image: ${{ builds.frontend.id }}
     environment:
       DB_URL: ${{ databases.main.url }}
-      KRATOS_ADDR: ${{ dependencies.kratos.services.kratos-public.url }}
-      KRATOS_ADMIN_ADDR: ${{ dependencies.kratos.services.kratos-admin.url }}
+      KRATOS_ADDR: ${{ dependencies.kratos.ingresses.kratos-public.url }}
+      KRATOS_ADMIN_ADDR: ${{ dependencies.kratos.ingresses.kratos-admin.url }}
       NEXT_PUBLIC_SELF_ADDR: ${{ ingresses.app.url }}
       NEXT_PUBLIC_KRATOS_ADDR: ${{ dependencies.kratos.ingresses.kratos-public.url }}
       NEXT_PUBLIC_USER_SERVICE_ADDR: ${{ dependencies.kratos.ingresses.auth.url }}

@@ -42,5 +42,6 @@ export const Button = (props: ButtonProps) => {
   }
 
   const btn = <button {...props} className={classes.join(' ')} />;
-  return props.href ? <Link href={props.href}>{btn}</Link> : btn;
+  // Using a Link will not work if the href is external, e.g. during login flow.
+  return props.href ? <a href={props.href}>{btn}</a> : btn;
 };
