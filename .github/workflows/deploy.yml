@@ -7,6 +7,7 @@ on:
       - migrations
 
 env:
+  ARCCTL_CACHE_KEY: arcctl-0.1.0 # Hardcoding a version number here so we don't keep downloading this
   ARC_DATACENTER: gh-datacenter
   ARC_ENVIRONMENT: gh-environment
   GCP_ACCOUNT_NAME: gcp-test
@@ -18,18 +19,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+      - name: arcctl binary
+        id: arcctl-cache
+        uses: actions/cache@v3
         with:
-          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-          create_credentials_file: true
-      - name: Download arcctl
+          path: ./arcctl
+          key: ${{ env.ARCCTL_CACHE_KEY }}
+      - if: ${{ steps.arcctl-cache.outputs.cache-hit != 'true' }}
+        name: Download arcctl
         run: curl -SL https://arcctl-dcs.nyc3.digitaloceanspaces.com/arcctl --output arcctl
       - name: Make arcctl executable
         run: chmod +x ./arcctl
+      - name: arcctl config
+        uses: actions/cache@v3
+        with:
+          path: ~/.config/arcctl/
+          key: ${{ github.run_id }}
       - name: Setup arcctl backend
         run: ./arcctl set state.backend --provider s3 --creds accessKeyId=${{ secrets.BUCKET_ACCESS_KEY_ID }} --creds secretAccessKey=${{ secrets.BUCKET_ACCESS_KEY }} --creds endpoint=https://nyc3.digitaloceanspaces.com --creds region=nyc3 --namespace arcctl-dcs
+
       # TODO: Probably remove this - should always be set by the datacenter already and stored in the state backend
       # - name: Setup arcctl gcp provider
       #   run: ./arcctl add account ${{ env.GCP_ACCOUNT_NAME }} -p gcp --creds project=${{ env.GCP_PROJECT }} --creds serviceAccountCredentialsFile=${{ env.GOOGLE_APPLICATION_CREDENTIALS }} || true
@@ -37,6 +45,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
+      - uses: actions/checkout@v3
+      - name: Load arcctl binary
+        id: arcctl-cache
+        uses: actions/cache@v3
+        with:
+          path: ./arcctl
+          key: ${{ env.ARCCTL_CACHE_KEY }}
+      - name: arcctl config
+        uses: actions/cache@v3
+        with:
+          path: ~/.config/arcctl/
+          key: ${{ github.run_id }}
       - name: Build component
         run: arcctl build architect.yml -t ${{ env.COMPONENT_NAME }}
       # TODO: Need repo creds
@@ -46,6 +66,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_component
     steps:
+      - uses: actions/checkout@v3
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+          create_credentials_file: true
+      - name: Load arcctl binary
+        id: arcctl-cache
+        uses: actions/cache@v3
+        with:
+          path: ./arcctl
+          key: ${{ env.ARCCTL_CACHE_KEY }}
+      - name: arcctl config
+        uses: actions/cache@v3
+        with:
+          path: ~/.config/arcctl/
+          key: ${{ github.run_id }}
       # TODO: Only do this if an environment file changes?
       - name: Apply environment
         run: ./arcctl apply env ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
