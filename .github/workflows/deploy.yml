@@ -13,6 +13,7 @@ env:
   GCP_ACCOUNT_NAME: gcp-test
   GCP_PROJECT: permanent-environment-testing
   COMPONENT_NAME: tyleraldrich/twitter-clone:latest
+  XDG_CONFIG_HOME: ./arcctl-config/
 
 jobs:
   setup:
@@ -33,7 +34,7 @@ jobs:
       - name: arcctl config
         uses: actions/cache@v3
         with:
-          path: ~/.config/arcctl/
+          path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.run_id }}
       - name: Setup arcctl backend
         run: ./arcctl set state.backend --provider s3 --creds accessKeyId=${{ secrets.BUCKET_ACCESS_KEY_ID }} --creds secretAccessKey=${{ secrets.BUCKET_ACCESS_KEY }} --creds endpoint=https://nyc3.digitaloceanspaces.com --creds region=nyc3 --namespace arcctl-dcs
@@ -55,7 +56,7 @@ jobs:
       - name: arcctl config
         uses: actions/cache@v3
         with:
-          path: ~/.config/arcctl/
+          path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.run_id }}
       - name: Docker Login
         uses: docker/login-action@v2.2.0
@@ -87,7 +88,7 @@ jobs:
       - name: arcctl config
         uses: actions/cache@v3
         with:
-          path: ~/.config/arcctl/
+          path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.run_id }}
       - name: List datacenters
         run: ./arcctl list dc
