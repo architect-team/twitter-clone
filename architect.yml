@@ -6,7 +6,7 @@ databases:
 
 dependencies:
   kratos:
-    component: architectio/kratos
+    component: tyleraldrich/kratos
     variables:
       allowed_return_urls:
         - ${{ ingresses.app.url }}
