@@ -7,7 +7,7 @@ on:
       - migrations
 
 env:
-  ARCCTL_CACHE_KEY: arcctl-0.1.0 # Hardcoding a version number here so we don't keep downloading this
+  ARCCTL_CACHE_KEY: arcctl-0.1.1 # Hardcoding a version number here so we don't keep downloading this
   ARC_DATACENTER: gh-datacenter
   ARC_ENVIRONMENT: gh-environment
   GCP_ACCOUNT_NAME: gcp-test
@@ -73,11 +73,11 @@ jobs:
     needs: build_component
     steps:
       - uses: actions/checkout@v3
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
         with:
-          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
           create_credentials_file: true
       - name: Load arcctl binary
         id: arcctl-cache
