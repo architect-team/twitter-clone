@@ -95,8 +95,8 @@ jobs:
         with:
           path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.run_id }}
-      - name: Echo google cred location
-        run: echo $GOOGLE_APPLICATION_CREDENTIALS
+      - name: ls config dir
+        run: ls ./arcctl-config
       # TODO: Only do this if an environment file changes?
       - name: Apply environment
         run: ./arcctl apply env ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
