@@ -79,6 +79,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
           create_credentials_file: true
+      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Setup GKE gcloud auth plugin
+        run: gcloud components install gke-gcloud-auth-plugin
       - name: Load arcctl binary
         id: arcctl-cache
         uses: actions/cache@v3
