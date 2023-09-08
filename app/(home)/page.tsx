@@ -6,7 +6,7 @@ import { HomeYeetForm } from './home-yeet-form';
 
 export const metadata: Metadata = {
   title: 'The Y Feed',
-  description: 'A list of messages yeeted into the ether',
+  description: 'A list of messages yeeted into the ether!',
 };
 
 const HomePage = () => {
