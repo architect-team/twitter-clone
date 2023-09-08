@@ -7,7 +7,7 @@ on:
       - migrations
 
 env:
-  ARCCTL_CACHE_KEY: arcctl-0.1.6 # Hardcoding a version number here so we don't keep downloading this
+  ARCCTL_CACHE_KEY: arcctl-0.1.7 # Hardcoding a version number here so we don't keep downloading this
   ARC_DATACENTER: gh-datacenter
   ARC_ENVIRONMENT: gh-environment
   GCP_ACCOUNT_NAME: gcp-test
