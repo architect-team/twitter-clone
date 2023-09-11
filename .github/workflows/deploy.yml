@@ -1,14 +1,13 @@
 name: Component Deploy
 
-# TODO: Update this, currently just for testing
 on:
   push:
     branches:
-      - migrations
+      - action-deployment # TODO: Update this, currently just for testing
 
 env:
   ARCCTL_CACHE_KEY: arcctl-0.1.7 # Hardcoding a version number here so we don't keep downloading this
-  ARC_DATACENTER: gh-datacenter
+  ARC_DATACENTER: gh-serverless-dc # gh-datacenter
   ARC_ENVIRONMENT: gh-environment
   GCP_ACCOUNT_NAME: gcp-test
   GCP_PROJECT: permanent-environment-testing
@@ -38,10 +37,6 @@ jobs:
           key: ${{ github.run_id }}
       - name: Setup arcctl backend
         run: ./arcctl set state.backend --provider s3 --creds accessKeyId=${{ secrets.BUCKET_ACCESS_KEY_ID }} --creds secretAccessKey=${{ secrets.BUCKET_ACCESS_KEY }} --creds endpoint=https://nyc3.digitaloceanspaces.com --creds region=nyc3 --namespace arcctl-dcs
-
-      # TODO: Probably remove this - should always be set by the datacenter already and stored in the state backend
-      # - name: Setup arcctl gcp provider
-      #   run: ./arcctl add account ${{ env.GCP_ACCOUNT_NAME }} -p gcp --creds project=${{ env.GCP_PROJECT }} --creds serviceAccountCredentialsFile=${{ env.GOOGLE_APPLICATION_CREDENTIALS }} || true
   build_component:
     runs-on: ubuntu-latest
     needs: setup
@@ -65,7 +60,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build component
         run: ./arcctl build architect.yml -t ${{ env.COMPONENT_NAME }}
-      # TODO: Need repo creds
       - name: Push component
         run: ./arcctl push ${{ env.COMPONENT_NAME }}
   deploy_component:
@@ -97,7 +91,7 @@ jobs:
           key: ${{ github.run_id }}
       - name: ls config dir
         run: ls ./arcctl-config
-      # TODO: Only do this if an environment file changes?
+      # TODO: Only do this if an environment file changes? When should this happen? It nukes the existing deployment
       - name: Apply environment
         run: ./arcctl apply env ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
       - name: Deploy component
