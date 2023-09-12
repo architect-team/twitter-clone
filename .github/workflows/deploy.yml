@@ -7,8 +7,8 @@ on:
 
 env:
   ARCCTL_CACHE_KEY: arcctl-0.1.7 # Hardcoding a version number here so we don't keep downloading this
-  ARC_DATACENTER: gh-serverless-dc # gh-datacenter
-  ARC_ENVIRONMENT: gh-environment
+  ARC_DATACENTER: gh-datacenter # gh-serverless-dc
+  ARC_ENVIRONMENT: ./environments/qa.yml
   GCP_ACCOUNT_NAME: gcp-test
   GCP_PROJECT: permanent-environment-testing
   COMPONENT_NAME: tyleraldrich/twitter-clone:latest
@@ -89,10 +89,7 @@ jobs:
         with:
           path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.run_id }}
-      - name: ls config dir
-        run: ls ./arcctl-config
-      # TODO: Only do this if an environment file changes? When should this happen? It nukes the existing deployment
       - name: Apply environment
-        run: ./arcctl apply env ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
-      - name: Deploy component
-        run: ./arcctl deploy ${{ env.COMPONENT_NAME }} -e ${{ env.ARC_ENVIRONMENT }} -i app:app --auto-approve
+        run: ./arcctl apply env qa-${{github.run_id}} ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
+      # - name: Deploy component
+      #   run: ./arcctl deploy ${{ env.COMPONENT_NAME }} -e ${{ env.ARC_ENVIRONMENT }} -i app:app --auto-approve
