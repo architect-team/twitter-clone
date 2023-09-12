@@ -1,13 +1,13 @@
 version: v1
 
 components:
-  smtp:
+  tyleraldrich/smtp4dev:
     source: tyleraldrich/smtp4dev:latest
     ingresses:
       smtp-http:
         subdomain: smtp
 
-  kratos:
+  tyleraldrich/kratos:
     source: tyleraldrich/kratos:latest
     ingresses:
       kratos-admin:
@@ -17,7 +17,7 @@ components:
       auth:
         subdomain: auth
 
-  twitter-clone:
+  tyleraldrich/twitter-clone:
     source: tyleraldrich/twitter-clone:latest
     ingresses:
       app:
