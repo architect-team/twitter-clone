@@ -1,0 +1,91 @@
+variables:
+  account:
+    type: arcctlAccount
+    description: The docker account to use for this datacenter
+    provider: docker
+  secretAccount:
+    type: arcctlAccount
+    description: The account used to store secrets
+
+resources:
+  service-registry:
+    type: volume
+    account: ${{ variables.account }}
+    name: traefik-volume
+
+  gateway:
+    type: deployment
+    name: my-gateway
+    account: ${{ variables.account }}
+    exposed_ports:
+      - port: 80
+        target_port: 80
+      - port: 8080
+        target_port: 8080
+    image: traefik:v2.10
+    command:
+      - --providers.file.directory=/etc/traefik
+      - --providers.file.watch=true
+      - --api.insecure=true
+      - --api.dashboard=true
+    volume_mounts:
+      - mount_path: /etc/traefik
+        readonly: true
+        volume: ${{ resources.service-registry.id }}
+
+accounts:
+  gateway:
+    name: local-gateway
+    provider: traefik
+    credentials:
+      type: volume
+      volume: ${{ resources.service-registry.id }}
+      account: ${{ variables.account }}
+
+environment:
+  resources:
+    pg:
+      type: databaseCluster
+      account: ${{ variables.account }}
+      name: ${{ environment.name }}-pg
+      databaseType: postgres
+      databaseVersion: '13'
+      databaseSize: n/a
+      vpc: n/a
+      region: n/a
+
+  accounts:
+    pg:
+      name: ${{ environment.name }}-postgres-db
+      provider: postgres
+      credentials:
+        host: ${{ environment.resources.pg.host }}
+        port: ${{ environment.resources.pg.port }}
+        username: ${{ environment.resources.pg.username }}
+        password: ${{ environment.resources.pg.password }}
+        databaseCluster: architect
+
+  hooks:
+    - when:
+        type: service
+      account: ${{ accounts.gateway.id }}
+      dnsZone: ${{ environment.name }}.172.17.0.1.nip.io
+      namespace: ${{ environment.name }}
+    - when:
+        type: ingressRule
+      account: ${{ accounts.gateway.id }}
+      registry: ${{ resources.service-registry.id }}
+      dnsZone: ${{ environment.name }}.127.0.0.1.nip.io
+      namespace: ${{ environment.name }}
+    - when:
+        type: database
+      account: ${{ environment.accounts.pg.id }}
+    - when:
+        type: deployment
+        image: oryd/kratos-selfservice-ui-node:v0.13.0
+      platform: linux/amd64
+    - when:
+        type: secret
+      account: ${{ variables.secretAccount }}
+    - account: ${{ variables.account }}
+      namespace: ${{ environment.name }}
