@@ -1,5 +1,9 @@
 import * as sdk from '@ory/client';
 
+export const oryUserAddr = process.env.NEXT_PUBLIC_USER_SERVICE_ADDR?.replace(
+  /\/$/,
+  ''
+);
 export const oryPublicAddr = process.env.NEXT_PUBLIC_KRATOS_ADDR?.replace(
   /\/$/,
   ''

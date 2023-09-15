@@ -1,0 +1,270 @@
+services:
+  traefik:
+    image: "traefik:v2.10"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.app.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  # TODO: Add volume to persist data
+  app-db:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: architect
+      POSTGRES_PASSWORD: architect
+      POSTGRES_DB: main
+
+  # TODO: Add volume to persist data
+  kratos-db:
+    image: postgres:15
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: architect
+      POSTGRES_PASSWORD: architect
+      POSTGRES_DB: kratos
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      DB_URL: postgresql://architect:architect@app-db:5432/main
+      KRATOS_ADDR: http://kratos.127.0.0.1.nip.io:4433/
+      KRATOS_ADMIN_ADDR: http://kratos.127.0.0.1.nip.io:4434/
+      NEXT_PUBLIC_SELF_ADDR: http://app.127.0.0.1.nip.io/
+      NEXT_PUBLIC_KRATOS_ADDR: http://kratos.127.0.0.1.nip.io:4433/
+      NEXT_PUBLIC_USER_SERVICE_ADDR: http://kratos-ui.127.0.0.1.nip.io:3001/
+    command: sh -c "npx prisma db push; npm run dev"
+    volumes:
+      - ./node_modules:/app/node_modules
+      - ./app:/app/app
+      - ./store:/app/store
+      - ./public:/app/public
+      - ./prisma:/app/prisma
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`app.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.app.entrypoints=app"
+    ports:
+      - 3000:3000
+    depends_on:
+      - app-db
+
+  kratos:
+    image: oryd/kratos:v1.0
+    ports:
+      - 4433:4433
+      - 4434:4434
+    entrypoint: ""
+    command:
+      - sh
+      - -c
+      - |
+        mkdir ./kratos
+        echo "$$IDENTITY_SCHEMA" > ./kratos/identity.schema.json
+        echo "$$CONFIG" > ./kratos/.kratos.yml
+        kratos -c ./kratos/.kratos.yml migrate sql -e --yes
+        kratos serve -c ./kratos/.kratos.yml --watch-courier --dev
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kratos.rule=Host(`kratos.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.kratos.service=kratos"
+    networks:
+      default:
+          aliases:
+            - kratos.127.0.0.1.nip.io
+    environment:
+      CONFIG: |
+        version: v0.13.0
+        dsn: postgresql://architect:architect@kratos-db:5432/kratos?max_conns=20&max_idle_conns=4
+        serve:
+          public:
+            base_url: http://kratos.127.0.0.1.nip.io:4433/
+            cors:
+              enabled: false
+          admin:
+            base_url: http://kratos.127.0.0.1.nip.io:4434/
+        selfservice:
+          default_browser_return_url: http://app.127.0.0.1.nip.io/
+          allowed_return_urls:
+            - http://app.127.0.0.1.nip.io/
+          methods:
+            password:
+              enabled: true
+            totp:
+              config:
+                issuer: Kratos
+              enabled: true
+            code:
+              enabled: true
+            link:
+              enabled: true
+            lookup_secret:
+              enabled: true
+          flows:
+            error:
+              ui_url: http://kratos-ui.127.0.0.1.nip.io:3001/error
+            settings:
+              ui_url: http://kratos-ui.127.0.0.1.nip.io:3001/settings
+              privileged_session_max_age: 15m
+              required_aal: highest_available
+            logout:
+              after:
+                default_browser_return_url: http://app.127.0.0.1.nip.io
+            login:
+              ui_url: http://kratos-ui.127.0.0.1.nip.io:3001/login
+              lifespan: 10m
+            registration:
+              ui_url: http://kratos-ui.127.0.0.1.nip.io:3001/registration
+              lifespan: 10m
+              after:
+                password:
+                  hooks:
+                    - hook: session
+                    - hook: show_verification_ui
+            verification:
+              enabled: true
+              ui_url: http://kratos-ui.127.0.0.1.nip.io:3001/verification
+              use: code
+              after:
+                default_browser_return_url: http://app.127.0.0.1.nip.io
+            recovery:
+              enabled: true
+              ui_url: http://kratos-ui.127.0.0.1.nip.io:3001/recovery
+              use: code
+        courier:
+          smtp:
+            connection_uri: smtps://architect:architect@smtp:25/?skip_ssl_verify=true
+        log:
+          level: info
+          format: text
+          leak_sensitive_values: true
+        secrets:
+          cookie:
+            - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+          cipher:
+            - 32-LONG-SECRET-NOT-SECURE-AT-ALL
+        ciphers:
+          algorithm: xchacha20-poly1305
+        hashers:
+          algorithm: bcrypt
+          bcrypt:
+            cost: 8
+        identity:
+          default_schema_id: default
+          schemas:
+            - id: default
+              url: file://./kratos/identity.schema.json
+        cookies:
+          domain: 127.0.0.1.nip.io
+          path: /
+          same_site: Lax
+      IDENTITY_SCHEMA: |
+        {
+          "$$id": "https://schemas.ory.sh/presets/kratos/quickstart/email-password/identity.schema.json",
+          "$$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Person",
+          "type": "object",
+          "properties": {
+            "traits": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "title": "E-Mail",
+                  "minLength": 3,
+                  "ory.sh/kratos": {
+                    "credentials": {
+                      "password": {
+                        "identifier": true
+                      }
+                    },
+                    "verification": {
+                      "via": "email"
+                    },
+                    "recovery": {
+                      "via": "email"
+                    }
+                  }
+                },
+                "username": {
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Username",
+                  "ory.sh/kratos": {
+                    "credentials": {
+                      "password": {
+                        "identifier": true
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": "object",
+                  "properties": {
+                    "first": {
+                      "title": "First Name",
+                      "type": "string"
+                    },
+                    "last": {
+                      "title": "Last Name",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "email",
+                "username"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+
+  kratos-ui:
+    image: tyleraldrich/kratos:latest-deployments-kratos-ui
+    environment:
+      KRATOS_PUBLIC_URL: http://kratos.127.0.0.1.nip.io:4433
+      KRATOS_BROWSER_URL: http://kratos.127.0.0.1.nip.io:4433
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kratos-ui.rule=Host(`kratos-ui.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.kratos-ui.service=kratos-ui"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.routers.kratos-ui.middlewares=cors@docker"
+    ports:
+      - 3001:3000
+
+  smtp:
+    image: rnwood/smtp4dev:v3
+    environment:
+      RelayOptions__Login: architect
+      RelayOptions__Password: architect
+      ServerOptions__TlsMode: ImplicitTls
+      ServerOptions__HostName: smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.smtp.rule=Host(`smtp.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.smtp.service=smtp"
+    networks:
+      default:
+          aliases:
+            - smtp.127.0.0.1.nip.io
+    ports:
+      - 2500:80

@@ -18,6 +18,7 @@ import {
 import { Button } from './button';
 import { classNames, getGravatarImageUrl } from './utils';
 import { Avatar } from './avatar';
+import { oryUserAddr } from '../ory';
 
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
@@ -81,10 +82,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
     navigation.push(
       {
         name: 'Sign in',
-        href:
-          process.env.NEXT_PUBLIC_USER_SERVICE_ADDR?.replace(/\/$/, '') +
-          '/login?return_to=' +
-          returnTo,
+        href: `${oryUserAddr}/login?return_to=${returnTo}`,
         icon: UserIcon,
         current: false,
         inverted: false,
@@ -92,12 +90,7 @@ export const AppLayout = ({ children }: React.PropsWithChildren) => {
       },
       {
         name: 'Sign up',
-        href:
-          process.env.NEXT_PUBLIC_USER_SERVICE_ADDR?.replace(/\/$/, '') +
-          '/registration?return_to=' +
-          returnTo +
-          '&after_verification_return_to=' +
-          returnTo,
+        href: `${oryUserAddr}/registration?return_to=${returnTo}&after_verification_return_to=${returnTo}`,
         icon: UserIcon,
         current: false,
         inverted: true,
