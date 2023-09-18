@@ -2,8 +2,6 @@ name: Component Deploy
 
 on:
   pull_request:
-    branches:
-      - master
 
 env:
   ARCCTL_CACHE_KEY: arcctl-0.1.8 # Hardcoding a version number here so we don't keep downloading this
