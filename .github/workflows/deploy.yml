@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  ARCCTL_CACHE_KEY: arcctl-0.1.8 # Hardcoding a version number here so we don't keep downloading this
+  ARCCTL_CACHE_KEY: arcctl-0.1.9 # Hardcoding a version number here so we don't keep downloading this
   ARC_DATACENTER: gh-datacenter # gh-serverless-dc
   ARC_ENVIRONMENT: ./environments/qa.yml
   GCP_ACCOUNT_NAME: gcp-test
@@ -88,4 +88,4 @@ jobs:
           path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.event.pull_request.number }}
       - name: Apply environment
-        run: ./arcctl apply env qa-${{ github.event.pull_request.number }} ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
+        run: ./arcctl apply env qa-${{ github.event.pull_request.number }} ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve --refresh
