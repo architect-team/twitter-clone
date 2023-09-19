@@ -88,4 +88,4 @@ jobs:
           path: ${{ env.XDG_CONFIG_HOME }}
           key: ${{ github.event.pull_request.number }}
       - name: Apply environment
-        run: ./arcctl apply env qa-${{ github.event.pull_request.number }} ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve --refresh
+        run: ./arcctl apply env qa-${{ github.event.pull_request.number }} ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve
