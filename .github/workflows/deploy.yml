@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  ARCCTL_CACHE_KEY: arcctl-0.3.0 # Hardcoding a version number here so we don't keep downloading this
+  ARCCTL_CACHE_KEY: arcctl-0.3.1 # Hardcoding a version number here so we don't keep downloading this
   ARC_DATACENTER: gh-datacenter # gh-serverless-dc
   ARC_ENVIRONMENT: ./environments/qa.yml
   GCP_ACCOUNT_NAME: gcp-test
