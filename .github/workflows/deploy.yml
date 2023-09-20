@@ -1,0 +1,91 @@
+name: Component Deploy
+
+on:
+  pull_request:
+
+env:
+  ARCCTL_CACHE_KEY: arcctl-0.3.1 # Hardcoding a version number here so we don't keep downloading this
+  ARC_DATACENTER: gh-datacenter # gh-serverless-dc
+  ARC_ENVIRONMENT: ./environments/qa.yml
+  GCP_ACCOUNT_NAME: gcp-test
+  GCP_PROJECT: permanent-environment-testing
+  COMPONENT_NAME: tyleraldrich/twitter-clone:latest
+  XDG_CONFIG_HOME: ./arcctl-config/
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: arcctl binary
+        id: arcctl-cache
+        uses: actions/cache@v3
+        with:
+          path: ./arcctl
+          key: ${{ env.ARCCTL_CACHE_KEY }}
+      - if: ${{ steps.arcctl-cache.outputs.cache-hit != 'true' }}
+        name: Download arcctl
+        run: curl -SL https://arcctl-dcs.nyc3.digitaloceanspaces.com/arcctl --output arcctl
+      - name: Make arcctl executable
+        run: chmod +x ./arcctl
+      - name: arcctl config
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.XDG_CONFIG_HOME }}
+          key: ${{ github.event.pull_request.number }}
+      - name: Setup arcctl backend
+        run: ./arcctl set state.backend --provider s3 --creds accessKeyId=${{ secrets.BUCKET_ACCESS_KEY_ID }} --creds secretAccessKey=${{ secrets.BUCKET_ACCESS_KEY }} --creds endpoint=https://nyc3.digitaloceanspaces.com --creds region=nyc3 --namespace arcctl-dcs
+  build_component:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load arcctl binary
+        id: arcctl-cache
+        uses: actions/cache@v3
+        with:
+          path: ./arcctl
+          key: ${{ env.ARCCTL_CACHE_KEY }}
+      - name: arcctl config
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.XDG_CONFIG_HOME }}
+          key: ${{ github.event.pull_request.number }}
+      - name: Docker Login
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build component
+        run: ./arcctl build architect.yml -t ${{ env.COMPONENT_NAME }}
+      - name: Push component
+        run: ./arcctl push ${{ env.COMPONENT_NAME }}
+  deploy_component:
+    runs-on: ubuntu-latest
+    needs: build_component
+    steps:
+      - uses: actions/checkout@v3
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          create_credentials_file: true
+      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Setup GKE gcloud auth plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+      - name: Load arcctl binary
+        id: arcctl-cache
+        uses: actions/cache@v3
+        with:
+          path: ./arcctl
+          key: ${{ env.ARCCTL_CACHE_KEY }}
+      - name: arcctl config
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.XDG_CONFIG_HOME }}
+          key: ${{ github.event.pull_request.number }}
+      - name: Apply environment
+        run: ./arcctl apply env qa-${{ github.event.pull_request.number }} ${{ env.ARC_ENVIRONMENT }} -d ${{ env.ARC_DATACENTER}} --auto-approve

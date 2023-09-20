@@ -3,7 +3,7 @@
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from '@/store';
 import { PropsWithChildren, useRef } from 'react';
-import { AuthState, setAuthData } from '@/store/authSlice';
+import { setAuthData } from '@/store/authSlice';
 import { Session } from '@ory/client';
 
 export const Provider = (

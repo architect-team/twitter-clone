@@ -21,9 +21,9 @@ export const HomeYeetForm = () => {
       body: JSON.stringify({
         message,
       }),
+    }).then(() => {
+      location.reload();
     });
-
-    location.reload();
   };
 
   return session ? (
